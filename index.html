@@ -1,0 +1,575 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Popup Window</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Plus Jakarta Sans', system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+        }
+
+        body {
+            min-height: 100vh;
+            background: radial-gradient(circle at 10% 30%, #f1f5fd, #d9e2f5);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 1.8rem;
+            margin: 0;
+            position: relative;
+        }
+
+        .card {
+            background: rgba(255, 255, 255, 0.75);
+            backdrop-filter: blur(20px) saturate(180%);
+            -webkit-backdrop-filter: blur(20px) saturate(180%);
+            border-radius: 3rem;
+            box-shadow: 0 40px 70px -15px rgba(28, 40, 60, 0.25), 0 10px 30px -10px rgba(0, 20, 40, 0.2), inset 0 1px 2px rgba(255,255,255,0.8);
+            padding: 2.8rem 2.8rem 3rem;
+            width: 100%;
+            max-width: 560px;
+            border: 1px solid rgba(255,255,255,0.6);
+            transition: transform 0.3s ease, box-shadow 0.4s ease;
+        }
+
+        .card:hover {
+            transform: translateY(-6px);
+            box-shadow: 0 50px 80px -18px rgba(20, 40, 70, 0.3), 0 15px 30px -12px #0f1a2e40;
+        }
+
+        .header-flair {
+            display: flex;
+            align-items: center;
+            gap: 0.6rem;
+            margin-bottom: 0.5rem;
+        }
+
+        .header-flair span {
+            font-size: 2.8rem;
+            filter: drop-shadow(0 8px 12px #5f7ebc40);
+            animation: subtle-float 4s infinite alternate ease-in-out;
+        }
+
+        @keyframes subtle-float {
+            0% { transform: translateY(0); }
+            100% { transform: translateY(-5px); }
+        }
+
+        h1 {
+            font-size: 2.5rem;
+            font-weight: 700;
+            letter-spacing: -0.03em;
+            background: linear-gradient(140deg, #15273f, #25406a);
+            -webkit-background-clip: text;
+            background-clip: text;
+            color: transparent;
+            line-height: 1.1;
+        }
+
+        .greeting {
+            font-size: 1.1rem;
+            color: #3e4f71;
+            font-weight: 400;
+            margin-bottom: 2.5rem;
+            padding-left: 0.2rem;
+            border-left: 4px solid #607fcf;
+            padding-left: 1.3rem;
+            background: linear-gradient(to right, rgba(96, 127, 207, 0.05), transparent);
+            border-radius: 0 2rem 2rem 0;
+        }
+
+        .input-field {
+            margin-bottom: 2rem;
+            position: relative;
+        }
+
+        .input-field label {
+            display: block;
+            font-size: 0.9rem;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.03em;
+            color: #2f4172;
+            margin-bottom: 0.6rem;
+            margin-left: 0.8rem;
+            opacity: 0.8;
+            transition: opacity 0.2s, transform 0.2s;
+        }
+
+        .input-field:focus-within label {
+            opacity: 1;
+            transform: translateX(6px);
+            color: #3855a0;
+        }
+
+        .input-field input {
+            width: 100%;
+            background: rgba(255, 255, 255, 0.6);
+            border: 2px solid rgba(255,255,255,0.8);
+            outline: none;
+            padding: 1.2rem 1.8rem;
+            font-size: 1.2rem;
+            border-radius: 2.5rem;
+            box-shadow: 0 10px 20px -12px rgba(0,0,0,0.1), inset 0 2px 5px rgba(255,255,255,0.9);
+            transition: all 0.25s ease;
+            color: #121f3f;
+            font-weight: 500;
+            backdrop-filter: blur(4px);
+        }
+
+        .input-field input:focus {
+            background: white;
+            border-color: #5773c7;
+            box-shadow: 0 14px 28px -12px #3855a060, 0 0 0 4px rgba(87, 115, 199, 0.15);
+            transform: scale(1.01);
+        }
+
+        .input-field input::placeholder {
+            color: #8c9dc1;
+            font-weight: 300;
+            font-size: 1rem;
+            opacity: 0.7;
+        }
+
+        .save-wrap {
+            position: relative;
+            margin: 2.8rem 0 1.2rem;
+        }
+
+        .save-btn {
+            background: #182844;
+            border: none;
+            color: white;
+            font-size: 1.35rem;
+            font-weight: 600;
+            padding: 1.3rem 2rem;
+            width: 100%;
+            border-radius: 3.5rem;
+            cursor: pointer;
+            box-shadow: 0 25px 35px -12px #1b2b4e, 0 4px 12px rgba(0, 0, 0, 0.1);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.8rem;
+            transition: all 0.3s cubic-bezier(0.2, 0.9, 0.3, 1.2);
+            border: 1px solid rgba(255,255,255,0.25);
+            letter-spacing: 0.5px;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .save-btn::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255,255,255,0.2), transparent);
+            transition: left 0.6s;
+        }
+
+        .save-btn:hover {
+            background: #203458;
+            transform: translateY(-5px) scale(1.02);
+            box-shadow: 0 35px 45px -15px #111f38;
+        }
+
+        .save-btn:hover::before {
+            left: 100%;
+        }
+
+        .save-btn:active {
+            transform: translateY(3px) scale(0.99);
+            box-shadow: 0 15px 25px -10px #0f1a30;
+        }
+
+        .save-btn i {
+            font-size: 1.7rem;
+            filter: drop-shadow(0 2px 4px rgba(0,0,0,0.2));
+            transition: transform 0.3s;
+        }
+
+        .save-btn:hover i {
+            transform: rotate(3deg) scale(1.1);
+        }
+
+        .info-note {
+            color: #4d6190;
+            font-size: 0.9rem;
+            text-align: center;
+            font-weight: 400;
+            opacity: 0.7;
+            letter-spacing: 0.2px;
+        }
+
+        .overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(15, 25, 40, 0.3);
+            backdrop-filter: blur(10px) brightness(0.98);
+            -webkit-backdrop-filter: blur(10px) brightness(0.98);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            visibility: hidden;
+            opacity: 0;
+            transition: opacity 0.4s ease, visibility 0.4s;
+            z-index: 1000;
+            padding: 1.8rem;
+        }
+
+        .overlay.active {
+            visibility: visible;
+            opacity: 1;
+        }
+
+        .popup-card {
+            background: rgba(255, 255, 255, 0.85);
+            backdrop-filter: blur(28px) saturate(200%);
+            -webkit-backdrop-filter: blur(28px) saturate(200%);
+            border-radius: 3.5rem;
+            max-width: 520px;
+            width: 100%;
+            padding: 2.8rem 2.8rem 2.5rem;
+            box-shadow: 0 60px 100px -20px #091122, 0 30px 40px -20px #1a2645, inset 0 1px 3px rgba(255,255,255,0.9);
+            border: 1px solid rgba(255,255,255,0.7);
+            transform: scale(0.9) translateY(25px);
+            transition: transform 0.5s cubic-bezier(0.2, 0.85, 0.3, 1.1), opacity 0.3s;
+            opacity: 0;
+        }
+
+        .active .popup-card {
+            transform: scale(1) translateY(0);
+            opacity: 1;
+        }
+
+        .popup-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 1.8rem;
+        }
+
+        .popup-header h2 {
+            font-size: 2.4rem;
+            font-weight: 700;
+            background: linear-gradient(125deg, #152b49, #29416b);
+            -webkit-background-clip: text;
+            background-clip: text;
+            color: transparent;
+            letter-spacing: -0.02em;
+            display: flex;
+            align-items: center;
+            gap: 0.6rem;
+        }
+
+        .popup-header h2 span {
+            font-size: 2.6rem;
+        }
+
+        .close-btn {
+            background: rgba(255, 255, 255, 0.6);
+            border: none;
+            width: 48px;
+            height: 48px;
+            border-radius: 50%;
+            font-size: 2rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: #1b2c4b;
+            cursor: pointer;
+            backdrop-filter: blur(8px);
+            border: 1px solid rgba(255,255,255,0.8);
+            transition: all 0.2s ease;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.05);
+        }
+
+        .close-btn:hover {
+            background: white;
+            transform: rotate(90deg) scale(1.1);
+            color: #091932;
+            box-shadow: 0 8px 18px rgba(0,20,50,0.15);
+        }
+
+        .data-panel {
+            background: rgba(255, 255, 255, 0.5);
+            backdrop-filter: blur(8px);
+            border-radius: 2.5rem;
+            padding: 2rem 2rem;
+            margin: 1.8rem 0 2rem;
+            border: 1px solid rgba(255,255,255,0.9);
+            box-shadow: inset 0 2px 5px rgba(255,255,255,0.8), 0 15px 25px -18px #101d38;
+        }
+
+        .data-row {
+            display: flex;
+            align-items: baseline;
+            padding: 1rem 0;
+            border-bottom: 1px dashed rgba(77, 109, 179, 0.3);
+            font-size: 1.3rem;
+            transition: background 0.2s;
+        }
+
+        .data-row:last-child {
+            border-bottom: none;
+        }
+
+        .data-label {
+            font-weight: 500;
+            width: 100px;
+            color: #334e7a;
+            opacity: 0.8;
+            font-size: 1.1rem;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .data-value {
+            font-weight: 700;
+            color: #0a1e3b;
+            word-break: break-word;
+            flex: 1;
+            text-align: right;
+            font-size: 1.3rem;
+            background: linear-gradient(145deg, #1b2d4e, #1f3162);
+            background-clip: text;
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .success-block {
+            background: rgba(40, 167, 120, 0.12);
+            backdrop-filter: blur(5px);
+            border-radius: 2.5rem;
+            padding: 1.2rem 1.8rem;
+            margin: 1.8rem 0 2rem;
+            display: flex;
+            align-items: center;
+            gap: 1.2rem;
+            border: 1px solid rgba(68, 180, 140, 0.35);
+            box-shadow: 0 8px 22px -14px #176b4e;
+            transform-origin: left;
+            animation: pop-success 0.5s ease-out;
+        }
+
+        @keyframes pop-success {
+            0% { transform: scale(0.9); opacity: 0.3; }
+            50% { transform: scale(1.02); }
+            100% { transform: scale(1); opacity: 1; }
+        }
+
+        .success-icon {
+            font-size: 2.8rem;
+            filter: drop-shadow(0 4px 6px #1f8b6b60);
+            animation: ring 0.4s 0.1s both;
+        }
+
+        @keyframes ring {
+            0% { transform: rotate(0) scale(1); }
+            25% { transform: rotate(8deg) scale(1.1); }
+            50% { transform: rotate(-6deg) scale(1.1); }
+            100% { transform: rotate(0) scale(1); }
+        }
+
+        .success-block p {
+            font-size: 1.4rem;
+            font-weight: 600;
+            color: #0b4132;
+            letter-spacing: -0.2px;
+        }
+
+        .footer-action {
+            display: flex;
+            justify-content: flex-end;
+        }
+
+        .done-btn {
+            background: white;
+            border: none;
+            padding: 1rem 3rem;
+            border-radius: 3rem;
+            font-weight: 600;
+            font-size: 1.2rem;
+            color: #13223d;
+            cursor: pointer;
+            box-shadow: 0 10px 20px -10px #101f39;
+            transition: all 0.2s;
+            border: 1px solid rgba(255,255,255,0.7);
+            backdrop-filter: blur(4px);
+            letter-spacing: 0.3px;
+        }
+
+        .done-btn:hover {
+            background: #eef3ff;
+            transform: translateY(-3px);
+            box-shadow: 0 18px 28px -12px #1b2d51;
+        }
+
+        .done-btn:active {
+            transform: translateY(2px);
+            box-shadow: 0 10px 15px -8px #0d1b33;
+        }
+
+        .popup-card .data-row:hover {
+            background: rgba(255,255,255,0.3);
+            border-radius: 2rem;
+            padding-left: 1rem;
+            transition: padding 0.2s, background 0.2s;
+        }
+    </style>
+</head>
+<body>
+    <div class="card">
+        <div class="header-flair">
+            <span>🌀</span>
+            <h1>enter flow</h1>
+        </div>
+        <div class="greeting">fill once — preview with elegance</div>
+
+        <!-- input fields with improved spacing and UX hints -->
+        <div class="input-field">
+            <label for="name">full name</label>
+            <input type="text" id="name" placeholder="e.g. M Salman" autocomplete="off">
+        </div>
+
+        <div class="input-field">
+            <label for="age">age</label>
+            <input type="number" id="age" placeholder="your age" min="1" max="120">
+        </div>
+
+        <div class="input-field">
+            <label for="contact">contact</label>
+            <input type="text" id="contact" placeholder="email / phone">
+        </div>
+
+        <!-- save button with extra animation span -->
+        <div class="save-wrap">
+            <button class="save-btn" id="saveAction">
+                <i>💫</i> save & review
+            </button>
+        </div>
+        <div class="info-note">Flow with flow</div>
+    </div>
+
+    <!-- popup overlay (hidden initially) -->
+    <div class="overlay" id="popupOverlay">
+        <div class="popup-card">
+            <div class="popup-header">
+                <h2>
+                    <span>✨</span> snapshot
+                </h2>
+                <button class="close-btn" id="closePopupBtn">✕</button>
+            </div>
+
+            <!-- dynamic data will be injected -->
+            <div class="data-panel" id="dataPanel">
+                <div class="data-row">
+                    <span class="data-label">name</span>
+                    <span class="data-value" id="displayName">—</span>
+                </div>
+                <div class="data-row">
+                    <span class="data-label">age</span>
+                    <span class="data-value" id="displayAge">—</span>
+                </div>
+                <div class="data-row">
+                    <span class="data-label">contact</span>
+                    <span class="data-value" id="displayContact">—</span>
+                </div>
+            </div>
+
+            <!-- success message block with charming animation -->
+            <div class="success-block">
+                <span class="success-icon">✅</span>
+                <p>your data saved successfully</p>
+            </div>
+
+            <div class="footer-action">
+                <button class="done-btn" id="doneBtn">perfect</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        (function() {
+            const nameInput = document.getElementById('name');
+            const ageInput = document.getElementById('age');
+            const contactInput = document.getElementById('contact');
+            const saveBtn = document.getElementById('saveAction');
+
+            const overlay = document.getElementById('popupOverlay');
+            const closePopup = document.getElementById('closePopupBtn');
+            const doneBtn = document.getElementById('doneBtn');
+
+            const displayName = document.getElementById('displayName');
+            const displayAge = document.getElementById('displayAge');
+            const displayContact = document.getElementById('displayContact');
+
+            function getCurrentData() {
+                return {
+                    name: nameInput.value.trim() || '—',
+                    age: ageInput.value.trim() || '—',
+                    contact: contactInput.value.trim() || '—'
+                };
+            }
+
+            function updatePopupContent() {
+                const data = getCurrentData();
+                displayName.innerText = data.name;
+                displayAge.innerText = data.age;
+                displayContact.innerText = data.contact;
+            }
+
+            function showPopup() {
+                updatePopupContent();
+                overlay.classList.add('active');
+                document.body.style.overflow = 'hidden';
+            }
+
+            function hidePopup() {
+                overlay.classList.remove('active');
+                document.body.style.overflow = '';
+            }
+
+            saveBtn.addEventListener('click', function(e) {
+                e.preventDefault();
+
+                saveBtn.style.transform = 'scale(0.97)';
+                saveBtn.style.transition = 'transform 0.1s';
+                setTimeout(() => {
+                    saveBtn.style.transform = '';
+                }, 120);
+
+                showPopup();
+            });
+
+            closePopup.addEventListener('click', hidePopup);
+            doneBtn.addEventListener('click', hidePopup);
+
+            overlay.addEventListener('click', function(e) {
+                if (e.target === overlay) {
+                    hidePopup();
+                }
+            });
+
+            document.addEventListener('keydown', function(e) {
+                if (e.key === 'Escape' && overlay.classList.contains('active')) {
+                    hidePopup();
+                }
+            });
+
+            nameInput.value = 'M Salman';
+            ageInput.value = '18';
+            contactInput.value = '+92 333 1234567';
+        })();
+    </script>
+</body>
+</html>
